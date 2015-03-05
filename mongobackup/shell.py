@@ -96,8 +96,9 @@ def untarbz(source_file_path, output_directory_path):
         raise Exception("your output directory path must start with '/' or './'; you used: {}"
                         .format(output_directory_path))
     create_folders(output_directory_path)
-    if not listdir(output_directory_path):
-        raise Exception("Your output directory isn't empty.  Aborting as exiting files are not overwritten by tar.")
+    if listdir(output_directory_path):
+        raise Exception("Your output directory isn't empty.  Aborting as "
+                        + "exiting files are not overwritten by tar.")
     
     untar_command = ("tar jxfvkCp {} {} --atime-preserve "
                      .format(source_file_path, output_directory_path))
