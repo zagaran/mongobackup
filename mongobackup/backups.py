@@ -114,7 +114,7 @@ def restore(mongo_user, mongo_password, backup_tbz_path,
     
     untarbz(backup_tbz_path, backup_directory_output_path)
     mongorestore(mongo_user, mongo_password, backup_directory_output_path,
-                 drop_database=drop_database, cleanup=cleanup)
+                 drop_database=drop_database)
     if cleanup:
         rmtree(backup_directory_output_path)
 
