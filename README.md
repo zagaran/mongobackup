@@ -2,6 +2,12 @@ Mongo Backup
 ========
 Mongo backup is designed to handle backing up and restoring a mongo database locally and on s3.
 
+It can be installed by pip:
+
+```
+pip install mongobackup
+```
+
 Example usage follows.
 
 ```
