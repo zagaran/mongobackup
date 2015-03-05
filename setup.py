@@ -35,7 +35,7 @@ if sys.version < '2.5':
     sys.exit(1)
 
 setup(
-    name = "mongobackuo",
+    name = "mongobackup",
     version = "0.1.0",
     packages = find_packages(),
     
