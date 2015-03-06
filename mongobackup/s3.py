@@ -38,6 +38,7 @@ def s3_connect(bucket_name, s3_access_key_id, s3_secret_key):
     except S3ResponseError, e:
         if e.status == 403:
             raise Exception("Bad Amazon S3 credentials.")
+        raise
 
 def s3_key(bucket_name, s3_access_key_id, s3_secret_key):
     """ Returns an Boto S3 Key object connected to the provided bucket. """
