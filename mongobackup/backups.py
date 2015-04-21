@@ -63,7 +63,8 @@ def backup(mongo_username, mongo_password, local_backup_directory_path,
     
     if attached_directory_path:
         if not path.exists(attached_directory_path):
-            raise Exception("ERROR.  Would have to create {} for your attached storage, make sure that file paths already exist and re-run".format(attached_directory_path))
+            raise Exception("ERROR.  Would have to create %s for your attached storage, make sure that file paths already exist and re-run"
+                            % (attached_directory_path))
     
     # Dump mongo, tarbz, copy to attached storage, upload to s3, purge, clean.
     full_file_name_path = local_backup_directory_path + custom_prefix + time_string()
@@ -102,7 +103,7 @@ def restore(mongo_user, mongo_password, backup_tbz_path,
     cleanup is set to False.
     
     Warning: Setting drop_database to True will drop the ENTIRE
-    CURRENTLY RUNNING DATABASE before restoring. 
+    CURRENTLY RUNNING DATABASE before restoring.
     
     Mongorestore requires a running mongod process, in addition the provided
     user must have restore permissions for the database.  A mongolia superuser
@@ -110,7 +111,7 @@ def restore(mongo_user, mongo_password, backup_tbz_path,
     By default this function will clean up the output of the untar operation.
     """
     if not path.exists(backup_tbz_path):
-        raise Exception("the provided tar file {} does not exist.".format(backup_tbz_path))
+        raise Exception("the provided tar file %s does not exist." % (backup_tbz_path))
     
     untarbz(backup_tbz_path, backup_directory_output_path)
     mongorestore(mongo_user, mongo_password, backup_directory_output_path,
@@ -128,14 +129,14 @@ def mongodump(mongo_user, mongo_password, mongo_dump_directory_path):
     if path.exists(mongo_dump_directory_path):
         # If a backup dump already exists, delete it
         rmtree(mongo_dump_directory_path)
-    dump_command = ("mongodump -u {} -p {} -o {}"
-                    .format(mongo_user, mongo_password, mongo_dump_directory_path))
+    dump_command = ("mongodump -u %s -p %s -o %s"
+                    % (mongo_user, mongo_password, mongo_dump_directory_path))
     call(dump_command)
 
 
 def mongorestore(mongo_user, mongo_password, backup_directory_path, drop_database=False):
     """ Warning: Setting drop_database to True will drop the ENTIRE
-        CURRENTLY RUNNING DATABASE before restoring. 
+        CURRENTLY RUNNING DATABASE before restoring.
         
         Mongorestore requires a running mongod process, in addition the provided
         user must have restore permissions for the database.  A mongolia superuser
@@ -143,10 +144,11 @@ def mongorestore(mongo_user, mongo_password, backup_directory_path, drop_databas
     """
     
     if not path.exists(backup_directory_path):
-        raise Exception("the provided tar directory {} does not exist.".format(backup_directory_path))
+        raise Exception("the provided tar directory %s does not exist."
+                        % (backup_directory_path))
     
-    mongorestore_command = ("mongorestore -v -u {} -p {} {}"
-                            .format(mongo_user, mongo_password, backup_directory_path))
+    mongorestore_command = ("mongorestore -v -u %s -p %s %s"
+                            % (mongo_user, mongo_password, backup_directory_path))
     if drop_database:
         mongorestore_command = mongorestore_command + " --drop"
     call(mongorestore_command)
@@ -174,8 +176,8 @@ def purge_old_files(date_time, directory_path, custom_prefix="backup"):
             file_date_time = get_backup_file_time_tag(file_name, custom_prefix=custom_prefix)
         except ValueError as e:
             if "does not match format" in e.message:
-                print ("WARNING. file(s) in {} do not match naming convention."
-                       .format(directory_path))
+                print ("WARNING. file(s) in %s do not match naming convention."
+                       % (directory_path))
                 continue
             raise e
         if file_date_time < date_time:
