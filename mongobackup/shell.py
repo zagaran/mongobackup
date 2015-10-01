@@ -25,7 +25,7 @@ THE SOFTWARE.
 @author: Eli Jones
 """
 
-from os import mkdir, path, listdir
+from os import path, listdir, makedirs
 from shlex import split as command_to_array
 from subprocess import CalledProcessError, check_call
 
@@ -49,12 +49,8 @@ def create_folders(absolute_path):
     """ Creates the nested directory structure to satisfy a given absolute path,
         does nothing to existing directory structure.
         Any path passed in will be treated as an absolute path. """
-    levels = [level for level in absolute_path.split("/") if level != ""]
-    partial_path = "/"
-    for level in levels:
-        partial_path = partial_path + level + "/"
-        if not path.exists(partial_path):
-            mkdir(partial_path)  # FIRST MAKE SURE YOU HAVE WRITE PERMISSIONS!
+    if not path.exists(absolute_path):
+        makedirs(absolute_path)  # FIRST MAKE SURE YOU HAVE WRITE PERMISSIONS!
 
 
 def tarbz(source_directory_path, output_file_full_path):
