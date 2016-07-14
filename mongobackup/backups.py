@@ -129,8 +129,12 @@ def mongodump(mongo_user, mongo_password, mongo_dump_directory_path, silent=Fals
     if path.exists(mongo_dump_directory_path):
         # If a backup dump already exists, delete it
         rmtree(mongo_dump_directory_path)
-    dump_command = ("mongodump -u %s -p %s -o %s"
-                    % (mongo_user, mongo_password, mongo_dump_directory_path))
+    if silent:
+        dump_command = ("mongodump --quiet -u %s -p %s -o %s"
+                        % (mongo_user, mongo_password, mongo_dump_directory_path))
+    else:
+        dump_command = ("mongodump -u %s -p %s -o %s"
+                        % (mongo_user, mongo_password, mongo_dump_directory_path))
     call(dump_command, silent=silent)
 
 
@@ -147,8 +151,12 @@ def mongorestore(mongo_user, mongo_password, backup_directory_path, drop_databas
         raise Exception("the provided tar directory %s does not exist."
                         % (backup_directory_path))
     
-    mongorestore_command = ("mongorestore -v -u %s -p %s %s"
-                            % (mongo_user, mongo_password, backup_directory_path))
+    if silent:
+        mongorestore_command = ("mongorestore --quiet -u %s -p %s %s"
+                                % (mongo_user, mongo_password, backup_directory_path))
+    else:
+        mongorestore_command = ("mongorestore -v -u %s -p %s %s"
+                                % (mongo_user, mongo_password, backup_directory_path))
     if drop_database:
         mongorestore_command = mongorestore_command + " --drop"
     call(mongorestore_command, silent=silent)
