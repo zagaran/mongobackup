@@ -25,17 +25,25 @@ THE SOFTWARE.
 @author: Eli Jones
 """
 
-from os import path, listdir, makedirs
+from os import path, listdir, makedirs, devnull
 from shlex import split as command_to_array
 from subprocess import CalledProcessError, check_call
 
-def call(command):
+import os
+import subprocess
+
+def call(command, silent=False):
     """ Runs a bash command safely, with shell=false, catches any non-zero
         return codes.  Raises slightly modified CalledProcessError exceptions
         on failures.
         Note: command is a string and cannot include pipes."""
-    try:  # Using the defaults, shell=False, no i/o redirection.
-        return check_call(command_to_array(command))
+    try:
+        if silent:
+            with open(os.devnull, 'w')  as FNULL:
+                return subprocess.check_call(command_to_array(command), stdout=FNULL)
+        else:
+            # Using the defaults, shell=False, no i/o redirection.
+            return check_call(command_to_array(command))
     except CalledProcessError as e:
         # We are modifying the error itself for 2 reasons.  1) it WILL contain
         # login credentials when run_mongodump is run, 2) CalledProcessError is
@@ -53,7 +61,7 @@ def create_folders(absolute_path):
         makedirs(absolute_path)  # FIRST MAKE SURE YOU HAVE WRITE PERMISSIONS!
 
 
-def tarbz(source_directory_path, output_file_full_path):
+def tarbz(source_directory_path, output_file_full_path, silent=False):
     """ Tars and bzips a directory, preserving as much metadata as possible.
         Adds '.tbz' to the provided output file name. """
     output_directory_path = output_file_full_path.rsplit("/", 1)[0]
@@ -67,11 +75,11 @@ def tarbz(source_directory_path, output_file_full_path):
     # access time.  tar is the only program in the universe to use (dstn, src).
     tar_command = ("tar jpcfvC %s %s %s" %
                    (full_tar_file_path, source_directory_path, "./"))
-    call(tar_command)
+    call(tar_command, silent=silent)
     return full_tar_file_path
 
 
-def untarbz(source_file_path, output_directory_path):
+def untarbz(source_file_path, output_directory_path, silent=False):
     """ Restores your mongo database backup from a .tbz created using this library.
     This function will ensure that a directory is created at the file path
     if one does not exist already.
@@ -97,4 +105,4 @@ def untarbz(source_file_path, output_directory_path):
     
     untar_command = ("tar jxfvkCp %s %s --atime-preserve " %
                      (source_file_path, output_directory_path))
-    call(untar_command)
+    call(untar_command, silent=silent)

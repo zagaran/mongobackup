@@ -38,7 +38,7 @@ def backup(mongo_username, mongo_password, local_backup_directory_path,
            attached_directory_path=None, custom_prefix="backup",
            mongo_backup_directory_path="/tmp/mongo_dump",
            s3_bucket=None, s3_access_key_id=None, s3_secret_key=None,
-           purge_local=None, purge_attached=None, cleanup=True):
+           purge_local=None, purge_attached=None, cleanup=True, silent=False):
     """
     Runs a backup operation to At Least a local directory.
     You must provide mongodb credentials along with a a directory for a dump
@@ -68,9 +68,9 @@ def backup(mongo_username, mongo_password, local_backup_directory_path,
     
     # Dump mongo, tarbz, copy to attached storage, upload to s3, purge, clean.
     full_file_name_path = local_backup_directory_path + custom_prefix + time_string()
-    mongodump(mongo_username, mongo_password, mongo_backup_directory_path)
+    mongodump(mongo_username, mongo_password, mongo_backup_directory_path, silent=silent)
     
-    local_backup_file = tarbz(mongo_backup_directory_path, full_file_name_path)
+    local_backup_file = tarbz(mongo_backup_directory_path, full_file_name_path, silent=silent)
     
     if attached_directory_path:
         copy(local_backup_file, attached_directory_path + local_backup_file.split("/")[-1])
@@ -94,7 +94,7 @@ def backup(mongo_username, mongo_password, local_backup_directory_path,
 
 def restore(mongo_user, mongo_password, backup_tbz_path,
             backup_directory_output_path="/tmp/mongo_dump",
-            drop_database=False, cleanup=True):
+            drop_database=False, cleanup=True, silent=False):
     """
     Runs mongorestore with source data from the provided .tbz backup, using
     the provided username and password.
@@ -113,14 +113,14 @@ def restore(mongo_user, mongo_password, backup_tbz_path,
     if not path.exists(backup_tbz_path):
         raise Exception("the provided tar file %s does not exist." % (backup_tbz_path))
     
-    untarbz(backup_tbz_path, backup_directory_output_path)
+    untarbz(backup_tbz_path, backup_directory_output_path, silent=silent)
     mongorestore(mongo_user, mongo_password, backup_directory_output_path,
-                 drop_database=drop_database)
+                 drop_database=drop_database, silent=silent)
     if cleanup:
         rmtree(backup_directory_output_path)
 
 
-def mongodump(mongo_user, mongo_password, mongo_dump_directory_path):
+def mongodump(mongo_user, mongo_password, mongo_dump_directory_path, silent=False):
     """ Runs mongodump using the provided credentials on the running mongod
         process.
         
@@ -131,10 +131,10 @@ def mongodump(mongo_user, mongo_password, mongo_dump_directory_path):
         rmtree(mongo_dump_directory_path)
     dump_command = ("mongodump -u %s -p %s -o %s"
                     % (mongo_user, mongo_password, mongo_dump_directory_path))
-    call(dump_command)
+    call(dump_command, silent=silent)
 
 
-def mongorestore(mongo_user, mongo_password, backup_directory_path, drop_database=False):
+def mongorestore(mongo_user, mongo_password, backup_directory_path, drop_database=False, silent=False):
     """ Warning: Setting drop_database to True will drop the ENTIRE
         CURRENTLY RUNNING DATABASE before restoring.
         
@@ -151,12 +151,13 @@ def mongorestore(mongo_user, mongo_password, backup_directory_path, drop_databas
                             % (mongo_user, mongo_password, backup_directory_path))
     if drop_database:
         mongorestore_command = mongorestore_command + " --drop"
-    call(mongorestore_command)
+    call(mongorestore_command, silent=silent)
 
 
 def time_string():
     """Returns a string with current UTC date and time."""
     return datetime.utcnow().strftime(DATETIME_FORMAT)
+
 
 def get_backup_file_time_tag(file_name, custom_prefix="backup"):
     """ Returns a datetime object computed from a file name string, with
@@ -164,6 +165,7 @@ def get_backup_file_time_tag(file_name, custom_prefix="backup"):
     name_string = file_name[len(custom_prefix):]
     time_tag = name_string.split(".", 1)[0]
     return datetime.strptime(time_tag, DATETIME_FORMAT)
+
 
 def purge_old_files(date_time, directory_path, custom_prefix="backup"):
     """ Takes a datetime object and a directory path, runs through files in the
@@ -176,8 +178,8 @@ def purge_old_files(date_time, directory_path, custom_prefix="backup"):
             file_date_time = get_backup_file_time_tag(file_name, custom_prefix=custom_prefix)
         except ValueError as e:
             if "does not match format" in e.message:
-                print ("WARNING. file(s) in %s do not match naming convention."
-                       % (directory_path))
+                print("WARNING. file(s) in %s do not match naming convention."
+                      % (directory_path))
                 continue
             raise e
         if file_date_time < date_time:
