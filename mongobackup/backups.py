@@ -94,7 +94,8 @@ def backup(mongo_username, mongo_password, local_backup_directory_path,
 
 def restore(mongo_user, mongo_password, backup_tbz_path,
             backup_directory_output_path="/tmp/mongo_dump",
-            drop_database=False, cleanup=True, silent=False):
+            drop_database=False, cleanup=True, silent=False,
+            skip_backup_system_files=False):
     """
     Runs mongorestore with source data from the provided .tbz backup, using
     the provided username and password.
@@ -114,6 +115,10 @@ def restore(mongo_user, mongo_password, backup_tbz_path,
         raise Exception("the provided tar file %s does not exist." % (backup_tbz_path))
     
     untarbz(backup_tbz_path, backup_directory_output_path, silent=silent)
+
+    if skip_backup_system_files:
+        rmtree("%s/admin" % backup_directory_output_path)
+    
     mongorestore(mongo_user, mongo_password, backup_directory_output_path,
                  drop_database=drop_database, silent=silent)
     if cleanup:
