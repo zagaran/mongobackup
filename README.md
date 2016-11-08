@@ -29,7 +29,7 @@ backup("mongo_user", "mongo_password", "/var/backups/mongo/",
 from mongobackup import backup
 backup("mongo_user", "mongo_password", "/var/backups/mongo/",
        attached_directory_path='/mnt/backups/',
-       s3_bucket="mongo-backu-bucket", s3_access_key_id="ASDF424242ASDF4242",
+       s3_bucket="mongo-backup-bucket", s3_access_key_id="ASDF424242ASDF4242",
        s3_secret_key="lksLKDkakka983jk1DKJa3lkadkjq3askllkad")
 ```
 
@@ -39,7 +39,7 @@ backup("mongo_user", "mongo_password", "/var/backups/mongo/",
 from mongobackup import backup
 backup("mongo_user", "mongo_password", "/var/backups/mongo/",
        attached_directory_path='/mnt/backups/',
-       s3_bucket="mongo-backu-bucket", s3_access_key_id="ASDF424242ASDF4242",
+       s3_bucket="mongo-backup-bucket", s3_access_key_id="ASDF424242ASDF4242",
        s3_secret_key="lksLKDkakka983jk1DKJa3lkadkjq3askllkad",
        purge_local=30, purge_attached=30)
 ```
@@ -47,7 +47,7 @@ backup("mongo_user", "mongo_password", "/var/backups/mongo/",
 ```
 # To download the latest S3 backup
 from mongobackup import s3_download
-s3_download("latest.tbz", s3_bucket="mongo-backu-bucket",
+s3_download("latest.tbz", s3_bucket="mongo-backup-bucket",
             s3_access_key_id="ASDF424242ASDF4242",
             s3_secret_key="lksLKDkakka983jk1DKJa3lkadkjq3askllkad")
 ```
@@ -55,11 +55,11 @@ s3_download("latest.tbz", s3_bucket="mongo-backu-bucket",
 ```
 # To see all s3 backups and download a particular one
 from mongobackup import s3_list, s3_download
-s3_list(s3_bucket="mongo-backu-bucket",
+s3_list(s3_bucket="mongo-backup-bucket",
         s3_access_key_id="ASDF424242ASDF4242",
         s3_secret_key="lksLKDkakka983jk1DKJa3lkadkjq3askllkad")
 
-s3_download("latest.tbz", s3_bucket="mongo-backu-bucket",
+s3_download("latest.tbz", s3_bucket="mongo-backup-bucket",
             s3_access_key_id="ASDF424242ASDF4242",
             s3_secret_key="lksLKDkakka983jk1DKJa3lkadkjq3askllkad",
             s3_file_key="backup_2015-03-05_21-40.tbz")
@@ -69,4 +69,11 @@ s3_download("latest.tbz", s3_bucket="mongo-backu-bucket",
 # To restore a backup
 from mongobackup import restore
 restore("mongo_user", "mongo_password", "latest.tbz")
+```
+
+```
+# If you are having difficulties with restoring a backup from an older version
+# of Mongo due to changes in their user permissions system, you can include the
+# skip_system_and_user_files flag.
+restore("mongo_user", "mongo_password", "latest.tbz", skip_system_and_user_files=True)
 ```
