@@ -40,7 +40,6 @@ setup(
     packages = find_packages(),
     
     author = "Zagaran, Inc.",
-    author_email = "zags at zagaran.com",
     description = "A library to manage mongo backups and restoration from backup",
     license = "MIT",
     keywords = "mongo mongodb database backup",
