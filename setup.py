@@ -36,7 +36,7 @@ if sys.version < '2.5':
 
 setup(
     name = "mongobackup",
-    version = "0.2.3",
+    version = "0.2.4",
     packages = find_packages(),
     
     author = "Zagaran, Inc.",
