@@ -34,7 +34,7 @@ from mongobackup.s3 import s3_upload
 DATETIME_FORMAT = "_%Y-%m-%d_%H-%M"
 
 
-def backup(mongo_username, mongo_password, local_backup_directory_path,
+def backup(mongo_username, mongo_password, local_backup_directory_path, database=None,
            attached_directory_path=None, custom_prefix="backup",
            mongo_backup_directory_path="/tmp/mongo_dump",
            s3_bucket=None, s3_access_key_id=None, s3_secret_key=None,
@@ -46,6 +46,8 @@ def backup(mongo_username, mongo_password, local_backup_directory_path,
     
         backup_prefix: optionally provide a prefix to be prepended to your backups,
             by default the prefix is "backup".
+        database: optionally provide the name of one specific database to back up
+            (instead of backing up all databases on the MongoDB server)
         attached_directory_path: makes a second copy of the backup to a different
             directory.  This directory is checked before other operations and
             will raise an error if it cannot be found.
@@ -68,7 +70,7 @@ def backup(mongo_username, mongo_password, local_backup_directory_path,
     
     # Dump mongo, tarbz, copy to attached storage, upload to s3, purge, clean.
     full_file_name_path = local_backup_directory_path + custom_prefix + time_string()
-    mongodump(mongo_username, mongo_password, mongo_backup_directory_path, silent=silent)
+    mongodump(mongo_username, mongo_password, mongo_backup_directory_path, database, silent=silent)
     
     local_backup_file = tarbz(mongo_backup_directory_path, full_file_name_path, silent=silent)
     
@@ -130,7 +132,7 @@ def restore(mongo_user, mongo_password, backup_tbz_path,
         rmtree(backup_directory_output_path)
 
 
-def mongodump(mongo_user, mongo_password, mongo_dump_directory_path, silent=False):
+def mongodump(mongo_user, mongo_password, mongo_dump_directory_path, database=None, silent=False):
     """ Runs mongodump using the provided credentials on the running mongod
         process.
         
@@ -145,6 +147,8 @@ def mongodump(mongo_user, mongo_password, mongo_dump_directory_path, silent=Fals
     else:
         dump_command = ("mongodump -u %s -p %s -o %s"
                         % (mongo_user, mongo_password, mongo_dump_directory_path))
+    if database:
+        dump_command += (" --db %s" % database)
     call(dump_command, silent=silent)
 
 

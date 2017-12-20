@@ -16,6 +16,14 @@ from mongobackup import backup
 backup("mongo_user", "mongo_password", "/var/backups/mongo/")
 
 ```
+```
+# To do a local backup of only one specific database, not every database on
+# the server (some MongoDB auth/security configurations require this)
+from mongobackup import backup
+backup("mongo_user", "mongo_password", "/var/backups/mongo/",
+       database="my_database_name")
+
+```
 
 ```
 # To do a local backup and a local backup on attached storage
