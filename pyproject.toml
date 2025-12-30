@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mongobackup"
+version = "0.3.0"
+authors = [{name = "Zagaran, Inc.", email = "info@zagaran.com"}]
+license = "MIT"
+description = "A library to manage mongo backups and restoration from backup"
+keywords = ["mongo", "mongodb", "database", "backup"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Programming Language :: Python",
+    "Topic :: Database",
+]
+urls = {Homepage = "https://github.com/zagaran/mongobackup"}
+requires-python = ">=3.6"
+dependencies = ["boto >= 2.25"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages]
+find = {namespaces = false}
